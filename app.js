@@ -13,9 +13,21 @@ function trackDrinks() {
         if (drinks < drinkLimit * 0.5) {
             drinkStatus.className = 'drink-status safe';
             drinkStatus.textContent = 'SAFE';
+        } else if (drinks < drinkLimit) {
+            drinkStatus.className = 'drink-status caution';
+            drinkStatus.textContent = 'CAUTION';
+        } else {
+            drinkStatus.className = 'drink-status danger';
+            drinkStatus.textContent = 'LIMIT REACHED';
         }
+        
+        // Calculate time estimate
+        const hoursRemaining = Math.max(0, (drinks - hours));
+        const fullHours = Math.floor(hoursRemaining);
+        const minutes = Math.round((hoursRemaining - fullHours) * 60);
+        soberTime.textContent = `${fullHours}h ${minutes}m`;
     }
-}      
+}
 
 // Add safety mode toggle
 function addSafetyModeToggle() {
@@ -40,266 +52,6 @@ function addSafetyModeToggle() {
         const toggle = document.getElementById('safety-mode-toggle');
         const label = document.querySelector('.toggle-label');
         
-        if (toggle && label) {
-            toggle.addEventListener('change', function() {
-                if (this.checked) {
-                    label.textContent = 'Safety Mode: ON';
-                    document.body.classList.remove('safety-off');
-                } else {
-                    label.textContent = 'Safety Mode: OFF';
-                    document.body.classList.add('safety-off');
-                }
-            });
-        }
-    }
-}
-
-// Add cookie banner to the page
-function addCookieBanner() {
-    const banner = document.createElement('div');
-    banner.className = 'cookie-banner';
-    banner.innerHTML = `
-        <div class="cookie-text">
-            <p>We use cookies to enhance your experience on our website. By continuing to browse, you agree to our 
-            <a href="#" id="cookies-link-banner">Cookie Policy</a>.</p>
-        </div>
-        <button class="cookie-btn">Accept</button>
-    `;
-    document.body.appendChild(banner);
-    
-    // Add event listener for the cookie policy link
-    const cookiesLinkBanner = document.getElementById('cookies-link-banner');
-    if (cookiesLinkBanner) {
-        cookiesLinkBanner.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('cookies-modal');
-        }); 
-    }
-}
-
-// Setup cookie banner
-function setupCookieBanner() {
-    const cookieBanner = document.querySelector('.cookie-banner');
-    const acceptButton = document.querySelector('.cookie-btn');
-    
-    // Check if cookie consent was previously given
-    const cookieConsent = localStorage.getItem('cookieConsent');
-    
-    if (!cookieConsent && cookieBanner) {
-        // Show banner after a short delay
-        setTimeout(() => {
-            cookieBanner.style.display = 'flex';
-        }, 2000);
-        
-        // Handle accept button
-        if (acceptButton) {
-            acceptButton.addEventListener('click', function() {
-                localStorage.setItem('cookieConsent', 'true');
-                cookieBanner.style.display = 'none';
-            });
-        }
-    }
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 80, // Account for fixed header
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// Counter animation for stats
-function animateCounters() {
-    // Only start animation when elements come into view
-    const statSection = document.querySelector('.statistics');
-    
-    if (statSection) {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                startCounterAnimations();
-                observer.disconnect(); // Only need to run once
-            }
-        }, { threshold: 0.3 });
-        
-        observer.observe(statSection);
-    }
-    
-    function startCounterAnimations() {
-        const statNumbers = document.querySelectorAll('.stat-number');
-        
-        statNumbers.forEach(stat => {
-            const target = parseFloat(stat.textContent);
-            const decimal = stat.textContent.includes('.');
-            const suffix = stat.textContent.match(/[^0-9.]/g)?.join('') || '';
-            let start = 0;
-            const duration = 2000; // ms
-            const step = 30; // ms
-            const increment = target / (duration / step);
-            
-            let current = 0;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    current = target;
-                    clearInterval(timer);
-                }
-                
-                if (decimal) {
-                    stat.textContent = current.toFixed(1) + suffix;
-                } else {
-                    stat.textContent = Math.floor(current) + suffix;
-                }
-            }, step);
-        });
-    }
-    
-    // Add legal modals to the page
-    function addLegalModals() {
-        const modalsHtml = `
-            <div class="modal" id="privacy-modal">
-                <div class="modal-content">
-                    <span class="close-modal" data-modal="privacy-modal">&times;</span>
-                    <h2>Privacy Policy</h2>
-                    <p>Last updated: April 6, 2025</p>
-                    <p>This Privacy Policy describes how Bar Buddy ("we", "us", or "our") collects, uses, and discloses your personal information when you use our mobile application ("App").</p>
-                    
-                    <h3>Information We Collect</h3>
-                    <p>When you use our App, we may collect the following types of information:</p>
-                    <ul>
-                        <li><strong>Personal Information:</strong> Email address (if you choose to share it for account purposes or support)</li>
-                        <li><strong>Usage Data:</strong> Information about how you use the App, including recipes viewed, saved favorites, and inventory items</li>
-                        <li><strong>Device Information:</strong> Device type, operating system, and unique device identifiers</li>
-                    </ul>
-                    
-                    <h3>How We Use Your Information</h3>
-                    <p>We use the information we collect to:</p>
-                    <ul>
-                        <li>Provide, maintain, and improve our App and services</li>
-                        <li>Respond to your inquiries and provide customer support</li>
-                        <li>Personalize your experience and deliver content relevant to your interests</li>
-                        <li>Monitor and analyze usage patterns and trends to enhance user experience</li>
-                        <li>Detect, investigate, and prevent fraudulent transactions and unauthorized access to our App</li>
-                    </ul>
-                    
-                    <h3>Sharing Your Information</h3>
-                    <p>We do not sell or rent your personal information to third parties. We may share your information with:</p>
-                    <ul>
-                        <li>Service providers who perform services on our behalf</li>
-                        <li>Legal authorities when required by law or to protect our rights</li>
-                    </ul>
-                    
-                    <h3>Data Security</h3>
-                    <p>We implement appropriate security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.</p>
-                    
-                    <h3>Your Rights</h3>
-                    <p>Depending on your location, you may have certain rights regarding your personal information, including the right to access, correct, delete, or restrict processing of your data.</p>
-                    
-                    <h3>Changes to This Privacy Policy</h3>
-                    <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
-                    
-                    <h3>Contact Us</h3>
-                    <p>If you have any questions about this Privacy Policy, please contact us at support@BarBuddy.com</p>
-                </div>
-            </div>
-            
-            <div class="modal" id="terms-modal">
-                <div class="modal-content">
-                    <span class="close-modal" data-modal="terms-modal">&times;</span>
-                    <h2>Terms of Service</h2>
-                    <p>Last updated: April 6, 2025</p>
-                    
-                    <h3>1. Acceptance of Terms</h3>
-                    <p>By downloading, installing, or using Bar Buddy app, you agree to be bound by these Terms of Service and our Privacy Policy.</p>
-                    
-                    <h3>2. License</h3>
-                    <p>We grant you a limited, non-exclusive, non-transferable, revocable license to use the App for your personal, non-commercial purposes.</p>
-                    
-                    <h3>3. User Accounts</h3>
-                    <p>You may need to create an account to use certain features of the App. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.</p>
-                    
-                    <h3>4. User Content</h3>
-                    <p>You may have the ability to submit content to the App, such as custom recipes or reviews. You retain ownership of your content, but grant us a worldwide, royalty-free license to use, reproduce, modify, and display your content in connection with the App.</p>
-                    
-                    <h3>5. Prohibited Conduct</h3>
-                    <p>You agree not to:</p>
-                    <ul>
-                        <li>Use the App for any illegal purpose or in violation of any laws</li>
-                        <li>Attempt to gain unauthorized access to the App or its related systems</li>
-                        <li>Interfere with or disrupt the operation of the App</li>
-                        <li>Distribute viruses or other harmful code</li>
-                        <li>Impersonate any person or entity</li>
-                    </ul>
-                    
-                    <h3>6. Intellectual Property</h3>
-                    <p>The App and its content, features, and functionality are owned by Bar Buddy and are protected by copyright, trademark, and other intellectual property laws.</p>
-                    
-                    <h3>7. Disclaimers</h3>
-                    <p>THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.</p>
-                    
-                    <h3>8. Limitation of Liability</h3>
-                    <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, BAR BUDDY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF THE APP.</p>
-                    
-                    <h3>9. Changes to Terms</h3>
-                    <p>We may modify these Terms at any time. Your continued use of the App after any modifications indicates your acceptance of the modified Terms.</p>
-                    
-                    <h3>10. Governing Law</h3>
-                    <p>These Terms shall be governed by and construed in accordance with the laws of the United States, without regard to its conflict of law provisions.</p>
-                    
-                    <h3>11. Contact Us</h3>
-                    <p>If you have any questions about these Terms, please contact us at support@BarBuddy.com</p>
-                </div>
-            </div>
-            
-            <div class="modal" id="cookies-modal">
-                <div class="modal-content">
-                    <span class="close-modal" data-modal="cookies-modal">&times;</span>
-                    <h2>Cookie Policy</h2>
-                    <p>Last updated: April 6, 2025</p>
-                    
-                    <h3>What Are Cookies</h3>
-                    <p>Cookies are small text files that are stored on your device when you visit our website or use our app. They are widely used to make websites and apps work more efficiently and provide information to the owners.</p>
-                    
-                    <h3>How We Use Cookies</h3>
-                    <p>Bar Buddy uses cookies and similar technologies for the following purposes:</p>
-                    <ul>
-                        <li><strong>Essential cookies:</strong> These are necessary for the website and app to function properly.</li>
-                        <li><strong>Performance cookies:</strong> These help us understand how visitors interact with our website and app by collecting and reporting information anonymously.</li>
-                        <li><strong>Functional cookies:</strong> These enable us to provide enhanced functionality and personalization.</li>
-                        <li><strong>Targeting cookies:</strong> These may be set through our site by our advertising partners to build a profile of your interests.</li>
-                    </ul>
-                    
-                    <h3>Your Cookie Choices</h3>
-                    <p>Most web browsers allow you to control cookies through their settings. However, if you limit the ability of websites to set cookies, you may impact your overall user experience.</p>
-                    
-                    <h3>Updates to This Policy</h3>
-                    <p>We may update our Cookie Policy from time to time. We will notify you of any changes by posting the new Cookie Policy on this page.</p>
-                    
-                    <h3>Contact Us</h3>
-                    <p>If you have any questions about our Cookie Policy, please contact us at support@BarBuddy.com</p>
-                </div>
-            </div>
-        `;
-        
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalsHtml;
-        document.body.appendChild(modalContainer);
-    }
-    
-    // Safety mode toggle event handler
-    function addSafetyModeToggle() {
-        // Code for safety toggle...
-        // Event handler for toggle change
         if (toggle && label) {
             toggle.addEventListener('change', function() {
                 if (this.checked) {
@@ -429,41 +181,254 @@ function addSafetyModeStyles() {
     `;
     
     document.head.appendChild(styleElement);
-} 
+}
 
+// Add cookie banner to the page
+function addCookieBanner() {
+    const banner = document.createElement('div');
+    banner.className = 'cookie-banner';
+    banner.innerHTML = `
+        <div class="cookie-text">
+            <p>We use cookies to enhance your experience on our website. By continuing to browse, you agree to our 
+            <a href="#" id="cookies-link-banner">Cookie Policy</a>.</p>
+        </div>
+        <button class="cookie-btn">Accept</button>
+    `;
+    document.body.appendChild(banner);
+    
+    // Add event listener for the cookie policy link
+    const cookiesLinkBanner = document.getElementById('cookies-link-banner');
+    if (cookiesLinkBanner) {
+        cookiesLinkBanner.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal('cookies-modal');
+        });
+    }
+}
 
-// Bar Buddy - Main JavaScript
+// Add legal modals to the page
+function addLegalModals() {
+    const modalsHtml = `
+        <div class="modal" id="privacy-modal">
+            <div class="modal-content">
+                <span class="close-modal" data-modal="privacy-modal">&times;</span>
+                <h2>Privacy Policy</h2>
+                <p>Last updated: April 6, 2025</p>
+                <p>This Privacy Policy describes how Bar Buddy ("we", "us", or "our") collects, uses, and discloses your personal information when you use our mobile application ("App").</p>
+                
+                <h3>Information We Collect</h3>
+                <p>When you use our App, we may collect the following types of information:</p>
+                <ul>
+                    <li><strong>Personal Information:</strong> Email address (if you choose to share it for account purposes or support)</li>
+                    <li><strong>Usage Data:</strong> Information about how you use the App, including recipes viewed, saved favorites, and inventory items</li>
+                    <li><strong>Device Information:</strong> Device type, operating system, and unique device identifiers</li>
+                </ul>
+                
+                <h3>How We Use Your Information</h3>
+                <p>We use the information we collect to:</p>
+                <ul>
+                    <li>Provide, maintain, and improve our App and services</li>
+                    <li>Respond to your inquiries and provide customer support</li>
+                    <li>Personalize your experience and deliver content relevant to your interests</li>
+                    <li>Monitor and analyze usage patterns and trends to enhance user experience</li>
+                    <li>Detect, investigate, and prevent fraudulent transactions and unauthorized access to our App</li>
+                </ul>
+                
+                <h3>Sharing Your Information</h3>
+                <p>We do not sell or rent your personal information to third parties. We may share your information with:</p>
+                <ul>
+                    <li>Service providers who perform services on our behalf</li>
+                    <li>Legal authorities when required by law or to protect our rights</li>
+                </ul>
+                
+                <h3>Data Security</h3>
+                <p>We implement appropriate security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.</p>
+                
+                <h3>Your Rights</h3>
+                <p>Depending on your location, you may have certain rights regarding your personal information, including the right to access, correct, delete, or restrict processing of your data.</p>
+                
+                <h3>Changes to This Privacy Policy</h3>
+                <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+                
+                <h3>Contact Us</h3>
+                <p>If you have any questions about this Privacy Policy, please contact us at support@BarBuddy.com</p>
+            </div>
+        </div>
+        
+        <div class="modal" id="terms-modal">
+            <div class="modal-content">
+                <span class="close-modal" data-modal="terms-modal">&times;</span>
+                <h2>Terms of Service</h2>
+                <p>Last updated: April 6, 2025</p>
+                
+                <h3>1. Acceptance of Terms</h3>
+                <p>By downloading, installing, or using Bar Buddy app, you agree to be bound by these Terms of Service and our Privacy Policy.</p>
+                
+                <h3>2. License</h3>
+                <p>We grant you a limited, non-exclusive, non-transferable, revocable license to use the App for your personal, non-commercial purposes.</p>
+                
+                <h3>3. User Accounts</h3>
+                <p>You may need to create an account to use certain features of the App. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.</p>
+                
+                <h3>4. User Content</h3>
+                <p>You may have the ability to submit content to the App, such as custom recipes or reviews. You retain ownership of your content, but grant us a worldwide, royalty-free license to use, reproduce, modify, and display your content in connection with the App.</p>
+                
+                <h3>5. Prohibited Conduct</h3>
+                <p>You agree not to:</p>
+                <ul>
+                    <li>Use the App for any illegal purpose or in violation of any laws</li>
+                    <li>Attempt to gain unauthorized access to the App or its related systems</li>
+                    <li>Interfere with or disrupt the operation of the App</li>
+                    <li>Distribute viruses or other harmful code</li>
+                    <li>Impersonate any person or entity</li>
+                </ul>
+                
+                <h3>6. Intellectual Property</h3>
+                <p>The App and its content, features, and functionality are owned by Bar Buddy and are protected by copyright, trademark, and other intellectual property laws.</p>
+                
+                <h3>7. Disclaimers</h3>
+                <p>THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.</p>
+                
+                <h3>8. Limitation of Liability</h3>
+                <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, BAR BUDDY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF THE APP.</p>
+                
+                <h3>9. Changes to Terms</h3>
+                <p>We may modify these Terms at any time. Your continued use of the App after any modifications indicates your acceptance of the modified Terms.</p>
+                
+                <h3>10. Governing Law</h3>
+                <p>These Terms shall be governed by and construed in accordance with the laws of the United States, without regard to its conflict of law provisions.</p>
+                
+                <h3>11. Contact Us</h3>
+                <p>If you have any questions about these Terms, please contact us at support@BarBuddy.com</p>
+            </div>
+        </div>
+        
+        <div class="modal" id="cookies-modal">
+            <div class="modal-content">
+                <span class="close-modal" data-modal="cookies-modal">&times;</span>
+                <h2>Cookie Policy</h2>
+                <p>Last updated: April 6, 2025</p>
+                
+                <h3>What Are Cookies</h3>
+                <p>Cookies are small text files that are stored on your device when you visit our website or use our app. They are widely used to make websites and apps work more efficiently and provide information to the owners.</p>
+                
+                <h3>How We Use Cookies</h3>
+                <p>Bar Buddy uses cookies and similar technologies for the following purposes:</p>
+                <ul>
+                    <li><strong>Essential cookies:</strong> These are necessary for the website and app to function properly.</li>
+                    <li><strong>Performance cookies:</strong> These help us understand how visitors interact with our website and app by collecting and reporting information anonymously.</li>
+                    <li><strong>Functional cookies:</strong> These enable us to provide enhanced functionality and personalization.</li>
+                    <li><strong>Targeting cookies:</strong> These may be set through our site by our advertising partners to build a profile of your interests.</li>
+                </ul>
+                
+                <h3>Your Cookie Choices</h3>
+                <p>Most web browsers allow you to control cookies through their settings. However, if you limit the ability of websites to set cookies, you may impact your overall user experience.</p>
+                
+                <h3>Updates to This Policy</h3>
+                <p>We may update our Cookie Policy from time to time. We will notify you of any changes by posting the new Cookie Policy on this page.</p>
+                
+                <h3>Contact Us</h3>
+                <p>If you have any questions about our Cookie Policy, please contact us at support@BarBuddy.com</p>
+            </div>
+        </div>
+    `;
+    
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalsHtml;
+    document.body.appendChild(modalContainer);
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Add the cookie banner to the page
-    addCookieBanner();
+// Setup cookie banner
+function setupCookieBanner() {
+    const cookieBanner = document.querySelector('.cookie-banner');
+    const acceptButton = document.querySelector('.cookie-btn');
     
-    // Add modals for Privacy Policy, Terms of Service, and Cookie Policy
-    addLegalModals();
-    // Initialize GSAP ScrollTrigger
-    gsap.registerPlugin(ScrollTrigger);
+    // Check if cookie consent was previously given
+    const cookieConsent = localStorage.getItem('cookieConsent');
     
-    // Set up animation for scroll-triggered elements
-    setupScrollAnimations();
+    if (!cookieConsent && cookieBanner) {
+        // Show banner after a short delay
+        setTimeout(() => {
+            cookieBanner.style.display = 'flex';
+        }, 2000);
+        
+        // Handle accept button
+        if (acceptButton) {
+            acceptButton.addEventListener('click', function() {
+                localStorage.setItem('cookieConsent', 'true');
+                cookieBanner.style.display = 'none';
+            });
+        }
+    }
+}
+
+// Setup modal functionality
+function setupModals() {
+    // Legal links
+    const privacyLink = document.getElementById('privacy-link');
+    const termsLink = document.getElementById('terms-link');
+    const cookiesLink = document.getElementById('cookies-link');
     
-    // Set up mobile menu toggle
-    setupMobileMenu();
+    // Modal close buttons
+    const closeButtons = document.querySelectorAll('.close-modal');
     
-    // Initialize the FAQ accordion
-    setupFAQ();
+    // Event listeners for opening modals
+    if (privacyLink) {
+        privacyLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal('privacy-modal');
+        });
+    }
     
-    // Set up the carousel for screenshots
-    setupCarousel();
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal('terms-modal');
+        });
+    }
     
-    // Set up the phone mockup animation
-    setupPhoneMockup();
+    if (cookiesLink) {
+        cookiesLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal('cookies-modal');
+        });
+    }
     
-    // Initialize modal functionality
-    setupModals();
+    // Event listeners for closing modals
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modalId = this.getAttribute('data-modal');
+            closeModal(modalId);
+        });
+    });
     
-    // Setup cookie banner
-    setupCookieBanner();
-});
+    // Close modal when clicking outside content
+    window.addEventListener('click', function(e) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (e.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+    
+    // Helper functions
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+    }
+    
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+}
 
 // Setup animations triggered by scrolling
 function setupScrollAnimations() {
@@ -633,120 +598,78 @@ function setupPhoneMockup() {
     }, 3000);
 }
 
-// Setup modal functionality
-function setupModals() {
-    // Legal links
-    const privacyLink = document.getElementById('privacy-link');
-    const termsLink = document.getElementById('terms-link');
-    const cookiesLink = document.getElementById('cookies-link');
+// Counter animation for stats
+function animateCounters() {
+    // Only start animation when elements come into view
+    const statSection = document.querySelector('.statistics');
     
-    // Modal close buttons
-    const closeButtons = document.querySelectorAll('.close-modal');
-    
-    // Event listeners for closing modals
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal');
-            closeModal(modalId);
-        });
-    });
-    
-    // Close modal when clicking outside content
-    window.addEventListener('click', function(e) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                closeModal(modal.id);
+    if (statSection) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                startCounterAnimations();
+                observer.disconnect(); // Only need to run once
             }
-        });
-    });
-    
-    // Helper functions
-    function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
+        }, { threshold: 0.3 });
+        
+        observer.observe(statSection);
     }
     
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scrolling
-        }
-    }
-} 
-function setupModals() {
-    // Legal links
-    const privacyLink = document.getElementById('privacy-link');
-    const termsLink = document.getElementById('terms-link');
-    const cookiesLink = document.getElementById('cookies-link');
-    
-    // Modal close buttons
-    const closeButtons = document.querySelectorAll('.close-modal');
-    
-    // Event listeners for opening modals
-    if (privacyLink) {
-        privacyLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('privacy-modal');
+    function startCounterAnimations() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const target = parseFloat(stat.textContent);
+            const decimal = stat.textContent.includes('.');
+            const suffix = stat.textContent.match(/[^0-9.]/g)?.join('') || '';
+            let start = 0;
+            const duration = 2000; // ms
+            const step = 30; // ms
+            const increment = target / (duration / step);
+            
+            let current = 0;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (decimal) {
+                    stat.textContent = current.toFixed(1) + suffix;
+                } else {
+                    stat.textContent = Math.floor(current) + suffix;
+                }
+            }, step);
         });
-    }
-    
-    if (termsLink) {
-        termsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('terms-modal');
-        });
-    }
-    
-    if (cookiesLink) {
-        cookiesLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('cookies-modal');
-        });
-    }
-    
-    // Event listeners for closing modals
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal');
-            closeModal(modalId);
-        });
-    });
-    
-    // Close modal when clicking outside content
-    window.addEventListener('click', function(e) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                closeModal(modal.id);
-            }
-        });
-    });
-    
-    // Helper functions
-    function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-    }
-    
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scrolling
-        }
     }
 }
 
-// Setup all event listeners
+// Smooth scrolling for anchor links
+function setupSmoothScrolling() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80, // Account for fixed header
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+}
+
+// Bar Buddy - Main JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize safety features
+    addSafetyModeStyles();
+    addSafetyModeToggle();
+    
     // Add the cookie banner to the page
     addCookieBanner();
     
@@ -776,137 +699,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup cookie banner
     setupCookieBanner();
-});
-
-// Setup modal functionality
-function setupModals() {
-    // Legal links
-    const privacyLink = document.getElementById('privacy-link');
-    const termsLink = document.getElementById('terms-link');
-    const cookiesLink = document.getElementById('cookies-link');
     
-    // Modal close buttons
-    const closeButtons = document.querySelectorAll('.close-modal');
+    // Setup smooth scrolling for anchor links
+    setupSmoothScrolling();
     
-    // Event listeners for opening modals
-    if (privacyLink) {
-        privacyLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('privacy-modal');
-        });
-    }
-    
-    if (termsLink) {
-        termsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('terms-modal');
-        });
-    }
-    
-    if (cookiesLink) {
-        cookiesLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('cookies-modal');
-        });
-    }
-    
-    // Event listeners for closing modals
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal');
-            closeModal(modalId);
-        });
-    });
-    
-    // Close modal when clicking outside content
-    window.addEventListener('click', function(e) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                closeModal(modal.id);
-            }
-        });
-    });
-    
-    // Helper functions
-    function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-    }
-    
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scrolling
-        }
-    }
-}
-
-// Cookie banner link event listener
-function addCookieBanner() {
-    const banner = document.createElement('div');
-    banner.className = 'cookie-banner';
-    banner.innerHTML = `
-        <div class="cookie-text">
-            <p>We use cookies to enhance your experience on our website. By continuing to browse, you agree to our 
-            <a href="#" id="cookies-link-banner">Cookie Policy</a>.</p>
-        </div>
-        <button class="cookie-btn">Accept</button>
-    `;
-    document.body.appendChild(banner);
-    
-    // Add event listener for the cookie policy link
-    const cookiesLinkBanner = document.getElementById('cookies-link-banner');
-    if (cookiesLinkBanner) {
-        cookiesLinkBanner.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal('cookies-modal');
-        });
-    }
-}
-
-// Setup cookie banner accept button
-function setupCookieBanner() {
-    const cookieBanner = document.querySelector('.cookie-banner');
-    const acceptButton = document.querySelector('.cookie-btn');
-    
-    // Check if cookie consent was previously given
-    const cookieConsent = localStorage.getItem('cookieConsent');
-    
-    if (!cookieConsent && cookieBanner) {
-        // Show banner after a short delay
-        setTimeout(() => {
-            cookieBanner.style.display = 'flex';
-        }, 2000);
-        
-        // Handle accept button
-        if (acceptButton) {
-            acceptButton.addEventListener('click', function() {
-                localStorage.setItem('cookieConsent', 'true');
-                cookieBanner.style.display = 'none';
-            });
-        }
-    }
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 80, // Account for fixed header
-                behavior: 'smooth'
-            });
-        }
-    });
+    // Initialize counter animations
+    animateCounters();
 });
